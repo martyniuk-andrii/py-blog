@@ -13,16 +13,6 @@
 
 <br>
 
-<form method="post" action="{% url 'blog:comment-create' pk=post.id %}">
-  {% csrf_token %}
-  <div class="font-weight-bold">
-    {{ form|crispy }}
-  </div>
-  <input type="submit" value="Add comment">
-</form>
-
-<br>
-
 <h5>{{ post.commentaries.count }} comment{{ post.commentaries.count|pluralize }}</h5>
 
 {% for comment in post.commentaries.all %}
@@ -38,4 +28,25 @@
 </div>
 {% endfor %}
 
+<br>
+
+{% if user.is_authenticated %}
+<form method="post">
+  {% csrf_token %}
+  <div class="font-weight-bold">
+    {{ form|crispy }}
+  </div>
+  <input type="submit" value="Add comment">
+  {% else %}
+  <div class="mb-3">
+    <textarea class="form-control" rows="10" disabled>
+Login to write a comment
+    </textarea>
+  </div>
+
+  <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">
+    Login
+  </a>
+  {% endif %}
+</form>
 {% endblock %}

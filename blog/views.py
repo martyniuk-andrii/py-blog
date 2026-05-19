@@ -22,21 +22,27 @@ def index(request: HttpRequest) -> HttpResponse:
 
 class PostDetailView(generic.DetailView):
     model = Post
+    template_name = "blog/post_detail.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["form"] = CommentForm()
+        context["comments"] = self.object.commentaries.all()
+        context["form"] = kwargs.get(
+            "form", CommentForm(user=self.request.user))
         return context
 
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
 
-class CommentCreateView(LoginRequiredMixin, generic.CreateView):
-    model = Commentary
-    form_class = CommentForm
+        form = CommentForm(request.POST, user=request.user)
 
-    def form_valid(self, form):
-        comment = form.save(commit=False)
-        comment.user = self.request.user
-        comment.post_id = self.kwargs["pk"]
-        comment.save()
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.post = self.object
+            comment.save()
 
-        return redirect("blog:post-detail", pk=self.kwargs["pk"])
+            return redirect("blog:post-detail", pk=self.object.pk)
+
+        context = self.get_context_data(form=form)
+        return self.render_to_response(context)
