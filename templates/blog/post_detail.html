@@ -43,10 +43,9 @@
 Login to write a comment
     </textarea>
   </div>
-
   <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">
     Login
   </a>
+  </form>
   {% endif %}
-</form>
 {% endblock %}
